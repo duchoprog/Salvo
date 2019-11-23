@@ -1,0 +1,277 @@
+package com.FSCom2.Salvo;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.GsonBuilderUtils;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/api")
+public class SalvoController {
+
+
+    private String autorizado;
+    @Autowired
+    private GameRepository gameRepo;
+
+    @Autowired
+    private PlayerRepository playerRepo;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private GamePlayerRepository gamePlayerRepo;
+    @Autowired
+    private ShipRepository shipRepo;
+    @Autowired
+    private SalvoRepository salvoRepo;
+
+    private Player yo;
+
+    @RequestMapping("/newGame")
+    public ResponseEntity<Map<String,Object>> newGame( Authentication auth){
+        Map<String,Object> map = new HashMap<>();
+        if (isGuest(auth)){
+            map.put("data","Logueate para crear un juego");
+            return new ResponseEntity<>(map, HttpStatus.UNAUTHORIZED);
+        }else{
+            Player jugador=playerRepo.findByEmail(auth.getName());
+            Game juego=new Game(LocalDateTime.now());
+            gameRepo.save(juego);
+            GamePlayer nuevoGP=new GamePlayer(LocalDateTime.now(),juego,jugador);
+            gamePlayerRepo.save(nuevoGP);
+            map.put("data",nuevoGP.getId() );
+            return new ResponseEntity<>(map, HttpStatus.OK);
+
+        }
+    }
+    @RequestMapping("/games")
+    public Object getAll() {
+        List<Object> todaLaInfo = new ArrayList<>();
+        todaLaInfo = gameRepo.findAll().stream().map(cada -> cada.gameDTO()).collect(Collectors.toList());
+        return todaLaInfo;
+    }
+
+    @RequestMapping("/games/players/{gamePlayerId}/ships")
+    public ResponseEntity<Map<String,Object>> deployShips(@PathVariable final Long gamePlayerId, @RequestBody List <Ship> barcos, Authentication auth){
+        Map<String,Object> map = new HashMap<>();
+
+        GamePlayer gamePlayer = gamePlayerRepo.findById(gamePlayerId).orElse(null);
+        Ship ship;
+        if (gamePlayerRepo.findById(gamePlayerId).get().getPlayer().getEmail().equals(getLogueado(auth)) ) {
+            if(barcos.size()!=0)
+{
+          if (barcos.size()==5)
+{            barcos.stream().forEach(cada -> {
+                gamePlayer.addShips(cada);
+                System.out.println(cada.getShipLoc());
+            });
+            gamePlayerRepo.save(gamePlayer);
+
+            map.put("data","tururu");
+            return new ResponseEntity<>(map, HttpStatus.OK);
+}else{
+              map.put("data","los barcos deben ser 5");
+              return new ResponseEntity<>(map, HttpStatus.FORBIDDEN);
+
+          }
+
+
+}else{
+                map.put("data","ya estan los barcos de este juego");
+                return new ResponseEntity<>(map, HttpStatus.FORBIDDEN);
+            }
+
+
+        }else{
+
+
+        map.put("data","solo podes elegir barcos en tus juegos");
+        return new ResponseEntity<>(map, HttpStatus.UNAUTHORIZED);
+}
+
+    }
+////salvoes
+
+    @RequestMapping("/games/players/{gamePlayerId}/salvoes")
+    public ResponseEntity<Map<String,Object>> fireSalvoes(@PathVariable final Long gamePlayerId, @RequestBody List <String> bombas, Authentication auth){
+        Map<String,Object> map = new HashMap<>();
+        AtomicInteger contador= new AtomicInteger(0);
+        GamePlayer gamePlayer = gamePlayerRepo.findById(gamePlayerId).orElse(null);
+
+        if (gamePlayerRepo.findById(gamePlayerId).get().getPlayer().getEmail().equals(getLogueado(auth)))
+        {
+
+            int salvoCount=gamePlayer.getSalvoes().size()+1;
+            Salvo salvo=salvoRepo.save(new Salvo(salvoCount,bombas));
+            System.out.println(salvo);
+            gamePlayer.addSalvoes(salvo);
+            gamePlayerRepo.save(gamePlayer);
+
+            map.put("data",salvoCount);
+            return new ResponseEntity<>(map, HttpStatus.OK);
+
+        }else{
+
+
+            map.put("data","eso no lo podes hacer");
+            return new ResponseEntity<>(map, HttpStatus.FORBIDDEN);
+        }
+
+    }
+
+
+
+
+    /////logueado
+    @RequestMapping("/logueado")
+    public String getLogueado(Authentication authentication) {
+        yo=playerRepo.findByEmail(authentication.getName());
+        return playerRepo.findByEmail(authentication.getName()).getEmail();
+    }
+
+    @RequestMapping("/players")
+    public Object createPlayer(@RequestParam  String name, @RequestParam String pwd){
+/////
+            Map <String,String> incompleto=new HashMap< >();
+            incompleto.put("error", "Media pila, completá email y password");
+
+            if (name.isEmpty() || pwd.isEmpty()  ) {
+                return new ResponseEntity<>(incompleto, HttpStatus.FORBIDDEN);
+            }
+
+        Map <String,String> repetido=new HashMap< >();
+        repetido.put("error", "Ese email ya está usado");
+
+        if (playerRepo.findByEmail(name) !=  null) {
+                return new ResponseEntity<>(repetido, HttpStatus.FORBIDDEN);
+            }
+            Player elNuevo=(new Player(name, passwordEncoder.encode(pwd)));
+            playerRepo.save(elNuevo);
+            return new ResponseEntity<Object>(elNuevo,HttpStatus.CREATED);
+        }
+
+ /////////////////////
+
+
+
+
+    @RequestMapping("/gamePlayersPropios")
+    public Object getInfo(Authentication authentication) {
+        String elLogueado= getLogueado(authentication);
+        autorizado=elLogueado;
+        List<Object> todaLaInfo = new ArrayList<>();
+        List<GamePlayer> gamePlayersPropios= gamePlayerRepo.findAll().stream()
+                .filter(cada -> cada.getPlayer().getEmail().equals(elLogueado) ).collect(Collectors.toList());
+        List<String> aVer=gamePlayersPropios.stream().map(cada->cada.getPlayer().getEmail()).collect(Collectors.toList());
+        if (aVer.isEmpty()){
+            return "no hay partidos de este jugador";
+        }
+        todaLaInfo = gameRepo.findAll().stream().map(cada -> cada.gameDTO()).collect(Collectors.toList());
+        //return todaLaInfo;
+        return gamePlayersPropios;
+    }
+    @RequestMapping("/game/{gid}/players")
+    public ResponseEntity<Map<String,Object>> joinGame(@PathVariable final Long gid, Authentication auth){
+        Map<String,Object> map = new HashMap<>();
+        Player jugador;
+        Game juego;
+        if (isGuest(auth)){
+            map.put("data","Logueate para sumarte a un juego");
+            return new ResponseEntity<>(map, HttpStatus.UNAUTHORIZED);
+        }else{
+            jugador=playerRepo.findByEmail(auth.getName());
+            juego= gameRepo.findById(gid).orElse(null);
+
+            if(juego.getGamePlayers().size()>1){
+                map.put("data","Ya estamos todos");
+                return new ResponseEntity<>(map, HttpStatus.UNAUTHORIZED);//
+            }
+            else if (juego.getGamePlayers().stream().anyMatch(cada-> cada.getPlayer().getId() == jugador.getId())){
+                map.put("data","No, cómico, no podés jugar contra vos mismo");
+                return new ResponseEntity<>(map, HttpStatus.UNAUTHORIZED);//
+
+            }
+            else{
+                if (jugador!=null){
+                    GamePlayer newGP=new GamePlayer(LocalDateTime.now(),juego,jugador);
+                    gamePlayerRepo.save(newGP);
+                    map.put("data",newGP.getId());
+                    return new ResponseEntity<>(map, HttpStatus.OK);//
+                }
+            }
+
+        }
+        map.put("data","tururu");
+    return new ResponseEntity<>(map, HttpStatus.OK);
+    }
+
+    @RequestMapping("/game_view/{id}")
+    public Object getGemeView(@PathVariable final Long id, Authentication authentication){
+        String elLogueado= getLogueado(authentication);
+        autorizado=elLogueado;
+        Map<String, Object> miGameView= new LinkedHashMap<>();
+        GamePlayer origen=gamePlayerRepo.findById(id).get();
+
+        // voy a chequear que solo muestre del autorizado     esto era el if: gamePlayerRepo.findById(id).get().getPlayer().getEmail().equals(autorizado)
+        if (gamePlayerRepo.findById(id).get().getPlayer().getEmail().equals(autorizado)){
+        GamePlayer gPRival = origen.getGame().getGamePlayers().stream().filter(cada->cada.getId()!=id).findFirst().orElse(null);
+        miGameView.put("yo",origen.getPlayer().getFullName());
+        miGameView.put("Mi juego", origen.getGame().gameDTO() );
+        miGameView.put("Mis barcos",origen.getShips().stream().map(cada->cada.shipDTO()).collect(Collectors.toList()) );
+    Object miGP= origen.getGame().gameDTO();
+    Object miRival= new Object();
+    List<String> barcosRivales= new ArrayList<>();
+    List<Map<String,Object>>lePegue=new ArrayList<>();
+
+
+    gPRival.getShips().forEach(cadaBarco->barcosRivales.addAll(cadaBarco.getShipLoc()));
+origen.getSalvoes().forEach(cadaSalvo->{
+    long salvoID=cadaSalvo.getSalvoID();
+    cadaSalvo.getSalvoLoc().forEach(cadaTiro->{
+if (barcosRivales.contains(cadaTiro)){
+            Map<String,Object> map = new HashMap<>();
+            map.put("acertado",cadaTiro);
+            map.put("salvo",salvoID);
+            lePegue.add(map);
+
+        }
+    });
+});
+            System.out.println(lePegue.get(1));
+
+        miGameView.put("Salvoes",origen.getGame().getGamePlayers().stream().flatMap(cada->cada.getSalvoes().stream().map(cadasalvo->cadasalvo.salvoDTO())));
+        miGameView.put("misAciertos",lePegue);
+        return miGameView;}else{
+            return new ResponseEntity<>("A dónde te creés que vas?", HttpStatus.UNAUTHORIZED);
+                    //"a donde vas?";
+            }
+
+    };
+
+
+    @RequestMapping("/leaderboard")
+    public Object getLeaders() {
+Map<String,Object> miLeaderboard= new LinkedHashMap<>();
+        miLeaderboard.put("leader",gamePlayerRepo.findAll().stream().map(cada->cada.leaderboardDTO()).collect(Collectors.toList()) );
+return miLeaderboard;
+    }
+
+    private boolean isGuest(Authentication authentication) {
+        return authentication == null || authentication instanceof AnonymousAuthenticationToken;
+    }
+
+
+}

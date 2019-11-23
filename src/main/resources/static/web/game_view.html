@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="game.css">
+    <link rel="stylesheet" href="normalize.css" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+    <h1 id="titulo"></h1>
+    <h2 id="versus"></h2>
+
+    <button onclick="enviarBarco()" id="botEnviar" class="shown">Enviar barcos de prueba </button>
+    <button onclick="volverAGames()" id="botVolver" class="shown">Volver </button>
+
+    <div class="decote">
+
+        <div class="flex-container">
+
+
+            <div id="grid">
+                <!--The grid will appear here -->
+            </div>
+
+            <div id="dock">
+                <div id="display">
+                    <p>Welcome...<br></p>
+                </div>
+
+                <!--The new ships will show up here, waiting for been placed in the grid -->
+                <div id="misTiros"><button id="botDisparar" onclick="disparar()">disparar</button>
+                    <div id="grid2">
+                        <!--The grid will appear here -->
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+
+
+    </div>
+
+
+
+    <script src="state.js"></script>
+    <script src="ships.js"></script>
+    <script src="grid.js"></script>
+    <script src="game_view.js"></script>
+
+
+</body>
+
+</html>

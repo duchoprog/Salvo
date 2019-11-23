@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<!-- fetch ("/api/login?name=j.bauer@ctu.gov&pwd=24",{method:"POST"}) -->
+<html lang="en">
+
+<head>
+    <meta http-equiv="Cache-Control" content="no-store" />
+    <meta http-equiv="expires" content="-1" />
+    <meta charset="UTF-8">
+    <title>Salvo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="display">
+        <p>Welcome...<br></p>
+    </div>
+    <div id="loginForm" class="shown">
+        <div> <label for="email">email</label><input type="text" name="email" id="email"
+                placeholder="someone@somewhere.com"></input></div>
+        <div> <label for="password">clave</label><input type="text" name="password" id="password"
+                placeholder="6 o más caracteres"></input></div>
+
+        <button id="logInButt" onclick="login()">Ingresar</button>
+        <button id="signUpButt" onclick="signUp()">Registrarme</button>
+    </div>
+    <div id="logoutForm" class="hidden">
+        <p></p> <button id="logOutButt" onclick="logout()">Logout</button>
+
+    </div>
+
+    <table id="lista">
+
+    </table>
+    <div id="nuevo">
+        <button onclick="crearJuego()">Crear juego nuevo</button>
+    </div>
+    <script src="state.js"></script>
+    <script src="../web/games.js"></script>
+
+</body>
+
+</html>
