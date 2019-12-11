@@ -2,7 +2,7 @@
 
 
 //URLSearchParams
-var rivalesHundidosArray = ['None']
+var rivalesHundidosArray = []
 var yo = "w"
 var miRival = 0
 var gameData = {}
@@ -96,45 +96,19 @@ function apiGameView() {
                     document.getElementById("esperandoDisp").classList.add("shown")
                 }
             }
+
             checkSalvo(gameData)
-            if (gameData["Mis barcos"].length != 0 && gameData.flotaRival > 0) {
-                armarTablaEstado(gameData, params)
-            }
-            if (gameData.Score != null) {
-                let result
-                switch (gameData.Score.score) {
-                    case 1.0:
-                        result = "WIN"
-                        break;
-                    case 0.0:
-                        result = "DEFEAT"
-                        break;
-                    default:
-                        result = "TIE"
-                    // code block
-                }
 
-
-                document.getElementById("botDisparar").classList.remove("shown")
-                document.getElementById("botDisparar").classList.add("hidden")
-                document.getElementById("esperandoDisp").classList.remove("shown")
-                document.getElementById("esperandoDisp").classList.add("hidden")
-                document.getElementById("versus").classList.remove("shown")
-                document.getElementById("versus").classList.add("hidden")
-                document.getElementById("titulo").classList.remove("hidden")
-                document.getElementById("titulo").classList.add("shown")
-                document.getElementById("titulo").innerHTML = `This battle has finished. It was a ${result}`
-
-            }
+            armarTablaEstado(gameData, params)
+            //document.getElementById("shipsB2").appendChild(hit)
 
         })
-
     /*  .catch(error => {
 
-     console.log(error)
+         console.log(error)
 
-     return error
- }) */
+         return error
+     }) */
     /*  .then(
          error2 => {
              if (error2) {
@@ -144,18 +118,9 @@ function apiGameView() {
          }
      ) */
 
-    setInterval(function () {
-        if (document.getElementById("botDisparar").classList.contains("hidden") && gameData["Mis barcos"].length == 5
-        ) {
-            { window.location.reload(true) }
-        }
-
-    }, 5000)
-
 
 }
 apiGameView()
-
 function volverAGames() {
     window.location.href = "games.html"
 }
@@ -180,11 +145,11 @@ function checkSalvo(json) {
                 "quien": "yo", "cuantosTiros": cuantosTiros
             }
             salvosMios++
+            yaDispare = salvosMios
+            yaRecibi = salvosRiv
             tirar(json.Salvoes[s].salvoLocs)
 
         }
-        yaDispare = salvosMios
-        yaRecibi = salvosRiv
     }
 
 
@@ -208,7 +173,7 @@ function recibirTiro(tiros, gameData) {
             }
 
         })
-        if (Object.keys(gameData.misHundidos) > 0) {
+        if (gameData.misHundidos) {
             misHundidos = misHundidos.filter(function (e) { return e == 'culo' })
             Object.keys(gameData.misHundidos).forEach(hundido => {
                 misHundidos.push(hundido)
@@ -311,13 +276,12 @@ function enviarBarco(array, gp) {
         }
         ).then(r => {
             console.log(r.data)
-            location.reload(true)
         })
     //   location.reload(true)
     if (gameData.flotaRival > 0 && yaDispare <= yaRecibi) {
 
 
-
+        document.getElementById("botDisparar").innerHTML = "CULO"
         document.getElementById("botDisparar").classList.remove("hidden")
         document.getElementById("botDisparar").classList.add("shown")
 
@@ -354,7 +318,10 @@ fetch("/echo/json/",
 
 
 function armarTablaEstado(gameData, params) {
-
+    if (termino()) {
+        console.log("TERMINO!")
+        terminar()
+    }
     gameData.Salvoes.forEach(element => {
         params = Number(params)
         //        console.log(element.GamePlayer, params)
@@ -383,11 +350,9 @@ function armarTablaEstado(gameData, params) {
     );
 
     if (gameData.rivalesHundidos && Object.keys(gameData.rivalesHundidos).length > 0) {
-        console.log('hay hundidos rivales')
-        rivalesHundidosArray = rivalesHundidosArray.filter(function (e) { return e == 'culo' })
         rivalesHundidosArray = Object.keys(gameData.rivalesHundidos)
     }
-    else { rivalesHundidosArray = ["None!!"] }
+    else { rivalesHundidosArray = [] }
     //  console.log("rivales hundidos", rivalesHundidosArray)
     miosLeft = gameData["Mis barcos"].length - Object.keys(gameData.misHundidos).length
     rivalLeft = gameData.flotaRival - Object.keys(gameData.rivalesHundidos).length
@@ -413,20 +378,21 @@ function hundir(gameData) {
     }
 }
 function termino() {//
-    console.log(gameData.Estado, "TERMI")
+    console.log(gameData.Estado)
     if (gameData.Estado == "perdi" || gameData.Estado == "empate" || gameData.Estado == "gane") {
-        console.log(gameData.Estado)
-        terminar()
         return true
     }
     return false
 }
 
 function terminar() {
-    var boton = document.querySelector("#botVolver")
-    boton.innerHTML = "Game Over, back to home screen"
-
-
+    var botones = document.querySelectorAll("button.shown")
+    for (b = 0; b < botones; b++) {
+        if (botones[b].id != "botVolver") {
+            botones[b].classList.remove("shown")
+            botones[b].classList.add("hidden")
+        }
+    }
     document.querySelector("h3").innerHTML = ""
     function bombazo() {
         console.log("basta papi, se acabo")

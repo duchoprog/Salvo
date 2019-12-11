@@ -87,22 +87,34 @@ public class SalvoApplication {
 /*
 
 			Salvo salvo1=salvoRepo.save(new Salvo(1,Arrays.asList("B5", "C5", "F1")));
-			Salvo salvo2=salvoRepo.save(new Salvo(1,Arrays.asList("B4", "B5", "B6")));
 			Salvo salvo3=salvoRepo.save(new Salvo(2,Arrays.asList("F2", "D5")));
+			Ship ship2= shipRepo.save(new Ship("submarine", 3, Arrays.asList("E1", "F1", "G1")));
+			Ship ship4= shipRepo.save(new Ship("destroyer", 3, Arrays.asList("B5", "C5", "D5")));
+
+Carrier5
+Battleship4
+Submarine3
+Destroyer3
+Patrol Boat2
+
 
 */
 
 			Ship ship1= new Ship("destroyer", 3, Arrays.asList("H2","H3","H4"));
 			Ship ship2= shipRepo.save(new Ship("submarine", 3, Arrays.asList("E1", "F1", "G1")));
+			Ship shipextra2= shipRepo.save(new Ship("carrier", 5, Arrays.asList("D2","E2", "F2", "G2", "H2")));
 			Ship ship3= shipRepo.save(new Ship("patrol_boat", 2, Arrays.asList("B4", "B5")));
+			Ship shipextra4= shipRepo.save(new Ship("patrol_boat", 2, Arrays.asList("B8", "B9")));
 			Ship ship4= shipRepo.save(new Ship("destroyer", 3, Arrays.asList("B5", "C5", "D5")));
-			Ship ship5= shipRepo.save(new Ship("patrol_boat", 2, Arrays.asList("F1", "F2")));
-
+			Ship ship5= shipRepo.save(new Ship("submarine", 3, Arrays.asList("F1", "F2", "F3")));
+// pb:, 2
 			gp1.addShips(ship5);
 			gp1.addShips(ship3);
 			gp1.addShips(ship1);
 			gp2.addShips(ship2);
 			gp2.addShips(ship4);
+			gp2.addShips(shipextra2);
+			gp2.addShips(shipextra4);
 
 			Ship ship6= shipRepo.save(new Ship("destroyer", 3, Arrays.asList("B5", "C5", "D5")));
 			Ship ship7= shipRepo.save(new Ship("patrol_boat", 2, Arrays.asList("C6", "C7")));
@@ -146,7 +158,7 @@ public class SalvoApplication {
 			gp11.addShips(ship22);
 			gp11.addShips(ship23);
 
-			Ship ship24= shipRepo.save(new Ship("destroyer", 3, Arrays.asList("B5", "C5", "D5")));
+			Ship ship24= shipRepo.save(new Ship("battleship", 4, Arrays.asList("A5","B5", "C5", "D5")));
 			Ship ship25= shipRepo.save(new Ship("patrol_boat", 2, Arrays.asList("C6", "C7")));
 			Ship ship26= shipRepo.save(new Ship("submarine", 3, Arrays.asList("A2", "A3", "A4")));
 			Ship ship27= shipRepo.save(new Ship("patrol_boat", 2, Arrays.asList("G6", "H6")));
@@ -159,7 +171,7 @@ public class SalvoApplication {
 
 			Salvo salvo1=salvoRepo.save(new Salvo(1,Arrays.asList("B5", "C5", "F1")));
 			Salvo salvo2=salvoRepo.save(new Salvo(1,Arrays.asList("B4", "B5", "B6")));
-			Salvo salvo3=salvoRepo.save(new Salvo(2,Arrays.asList("F2", "D5")));
+			Salvo salvo3=salvoRepo.save(new Salvo(2,Arrays.asList("F2", "D5", "B8", "B9")));
 			Salvo salvo4=salvoRepo.save(new Salvo(2,Arrays.asList("E1", "H3", "A2")));
 
 			Salvo salvo5=salvoRepo.save(new Salvo(1,Arrays.asList("A2", "A4", "G6")));
@@ -170,7 +182,7 @@ public class SalvoApplication {
 			Salvo salvo9=salvoRepo.save(new Salvo(1,Arrays.asList("B5", "C5", "F1")));
 			Salvo salvo10=salvoRepo.save(new Salvo(1,Arrays.asList("B4", "B5", "B6")));
 			Salvo salvo11=salvoRepo.save(new Salvo(2,Arrays.asList("F2", "D5")));
-			Salvo salvo12=salvoRepo.save(new Salvo(2,Arrays.asList("E1", "H3", "A2")));
+			Salvo salvo12=salvoRepo.save(new Salvo(2,Arrays.asList("E1", "H3", "A2", "C6", "C7")));
 
 			Salvo salvo13=salvoRepo.save(new Salvo(1,Arrays.asList("A2", "A4", "G6")));
 			Salvo salvo14=salvoRepo.save(new Salvo(1,Arrays.asList("B5", "D5", "C7")));

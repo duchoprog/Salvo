@@ -6,7 +6,6 @@ and a boolean that specifies whether the ship can be moved or not.
 */
 let contador = 0
 const createShips = function (shipType, length, orientation, parent, isStatic) {
-    console.log("contador")
     let ship = document.createElement('DIV')
     let grip = document.createElement('DIV')
     let content = document.createElement('DIV')
@@ -220,5 +219,4 @@ const createShips = function (shipType, length, orientation, parent, isStatic) {
 createShips('battleship', 4, 'horizontal', document.getElementById('dock'), false)
 createShips('submarine', 3, 'horizontal', document.getElementById('dock'), false)
 createShips('destroyer', 3, 'horizontal', document.getElementById('dock'), false)
-createShips('patrol_boat', 2, 'horizontal', document.getElementById('dock'), false) */
-
+createShips('patrol_boat', 2, 'horizontal', document.getElementById('dock'), false)  */

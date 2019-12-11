@@ -16,8 +16,14 @@
     <h1 id="titulo"></h1>
     <h2 id="versus"></h2>
 
-    <button onclick="enviarBarco()" id="botEnviar" class="shown">Enviar barcos de prueba </button>
-    <button onclick="volverAGames()" id="botVolver" class="shown">Volver </button>
+    <button onclick="enviarBarco()" id="botEnviar" class="shown">Position vessels </button>
+    <button onclick="volverAGames()" id="botVolver" class="shown">Back to Home Screen</button>
+    <table id="tablaEstado">
+        <tr id="salvoes">
+
+        </tr>
+        <tr id="hundidos"></tr>
+    </table>
 
     <div class="decote">
 
@@ -32,12 +38,16 @@
                 <div id="display">
                     <p>Welcome...<br></p>
                 </div>
+                
 
-                <!--The new ships will show up here, waiting for been placed in the grid -->
-                <div id="misTiros"><button id="botDisparar" onclick="disparar()">disparar</button>
-                    <div id="grid2">
-                        <!--The grid will appear here -->
-                    </div>
+
+            </div>
+            <!--The new ships will show up here, waiting for been placed in the grid -->
+            <div id="misTiros"><button id="botDisparar" onclick="disparar()" class="hidden">Pick 5 locations and click
+                    to fire salvo</button>
+                <h3 id="esperandoDisp" class="hidden">Esperando disparos rivales</h3>
+                <div id="grid2">
+                    <!--The grid will appear here -->
                 </div>
             </div>
 

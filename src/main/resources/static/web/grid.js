@@ -156,7 +156,7 @@ function bombazo(e) {
         //sacar del array
     } else {
         if (cuentaBombas < 5) {
-            console.log(e.target)
+            //console.log(e.target)
             e.target.classList.add("apuntado")
             cuentaBombas++
             display(`Ya tenes ${cuentaBombas} tiros listos`)
@@ -170,8 +170,8 @@ function bombazo(e) {
 }
 
 function disparar() {
-     gp = new URLSearchParams(location.search).get('gp')
-salvo=[]
+    gp = new URLSearchParams(location.search).get('gp')
+    salvo = []
     let apuntados = document.querySelectorAll(".apuntado")
     for (d = 0; d < apuntados.length; d++) {
         let loc = apuntados[d].dataset.y + apuntados[d].dataset.x
@@ -179,8 +179,8 @@ salvo=[]
 
     }
     console.log(JSON.stringify(salvo))
-//////
-fetch(`/api/games/players/${gp}/salvoes`, {
+    //////
+    fetch(`/api/games/players/${gp}/salvoes`, {
         method: "POST",
         headers: {
             'Accept': 'application/json',
@@ -202,11 +202,11 @@ fetch(`/api/games/players/${gp}/salvoes`, {
         }
 
         )
-        .then(r=>{
+        .then(r => {
 
             console.log(r.data)
             document.getElementById("botDisparar").setAttribute("disabled", true)
-            document.getElementById("botDisparar").innerHTML=`Ya hiciste ${r.data} disparos, le toca a tu rival`
+            document.getElementById("botDisparar").innerHTML = `Ya hiciste ${r.data} disparos, le toca a tu rival`
             window.location.reload()
         }
 
@@ -215,7 +215,7 @@ fetch(`/api/games/players/${gp}/salvoes`, {
     ////
 }
 
-/* 
+/*
 
 
 function enviarBarco(array, gp) {

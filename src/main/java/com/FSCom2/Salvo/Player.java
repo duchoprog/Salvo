@@ -53,6 +53,8 @@ public class Player {
     public Player(String email, String pass) {
         this.email = email;
         this.pass = pass;
+        this.lastName=" ";
+        this.firstName=email;
     }
 
     public Player(String lastName, String firstName, String email, String pass) {

@@ -37,8 +37,10 @@ public class SalvoController {
     private ShipRepository shipRepo;
     @Autowired
     private SalvoRepository salvoRepo;
+    @Autowired
+    private ScoreRepository scoreRepo;
 
-    private Player yo;
+    //public Player yo;
 
     @RequestMapping("/newGame")
     public ResponseEntity<Map<String,Object>> newGame( Authentication auth){
@@ -76,11 +78,12 @@ public class SalvoController {
           if (barcos.size()==5)
 {            barcos.stream().forEach(cada -> {
                 gamePlayer.addShips(cada);
-                System.out.println(cada.getShipLoc());
+                //System.out.println(cada.getShipLoc());
             });
             gamePlayerRepo.save(gamePlayer);
-
-            map.put("data","tururu");
+Object culo= new Object();
+culo="culo";
+            map.put("data",culo);
             return new ResponseEntity<>(map, HttpStatus.OK);
 }else{
               map.put("data","los barcos deben ser 5");
@@ -116,7 +119,7 @@ public class SalvoController {
 
             int salvoCount=gamePlayer.getSalvoes().size()+1;
             Salvo salvo=salvoRepo.save(new Salvo(salvoCount,bombas));
-            System.out.println(salvo);
+            //System.out.println(salvo);
             gamePlayer.addSalvoes(salvo);
             gamePlayerRepo.save(gamePlayer);
 
@@ -138,7 +141,10 @@ public class SalvoController {
     /////logueado
     @RequestMapping("/logueado")
     public String getLogueado(Authentication authentication) {
-        yo=playerRepo.findByEmail(authentication.getName());
+        if(isGuest(authentication)){
+            return "guest";
+        }
+        //yo=playerRepo.findByEmail(authentication.getName());
         return playerRepo.findByEmail(authentication.getName()).getEmail();
     }
 
@@ -224,20 +230,34 @@ public class SalvoController {
         autorizado=elLogueado;
         Map<String, Object> miGameView= new LinkedHashMap<>();
         GamePlayer origen=gamePlayerRepo.findById(id).get();
-
+        System.out.println(origen.getScore());
         // voy a chequear que solo muestre del autorizado     esto era el if: gamePlayerRepo.findById(id).get().getPlayer().getEmail().equals(autorizado)
         if (gamePlayerRepo.findById(id).get().getPlayer().getEmail().equals(autorizado)){
         GamePlayer gPRival = origen.getGame().getGamePlayers().stream().filter(cada->cada.getId()!=id).findFirst().orElse(null);
+        miGameView.put("Score",origen.getScore());
+        if(origen.getGame().getGamePlayers().size()==2) {
+            miGameView.put("flotaRival", gPRival.getShips().size());
+
+        }else{
+            miGameView.put("flotaRival",0);
+        }
+
+
         miGameView.put("yo",origen.getPlayer().getFullName());
         miGameView.put("Mi juego", origen.getGame().gameDTO() );
         miGameView.put("Mis barcos",origen.getShips().stream().map(cada->cada.shipDTO()).collect(Collectors.toList()) );
     Object miGP= origen.getGame().gameDTO();
     Object miRival= new Object();
     List<String> barcosRivales= new ArrayList<>();
+    List<String> barcosMios= new ArrayList<>();
     List<Map<String,Object>>lePegue=new ArrayList<>();
+    List<Map<String,Object>>mePego=new ArrayList<>();
+    Map<String, Object> rivalesHundidos= new HashMap<>();
+    Map<String, Object> misHundidos= new HashMap<>();
 
-
-    gPRival.getShips().forEach(cadaBarco->barcosRivales.addAll(cadaBarco.getShipLoc()));
+//////
+            if(origen.getGame().getGamePlayers().size()==2){
+    gPRival.getShips().forEach(cadaBarco->barcosRivales.addAll(cadaBarco.getShipLoc()));}
 origen.getSalvoes().forEach(cadaSalvo->{
     long salvoID=cadaSalvo.getSalvoID();
     cadaSalvo.getSalvoLoc().forEach(cadaTiro->{
@@ -250,11 +270,151 @@ if (barcosRivales.contains(cadaTiro)){
         }
     });
 });
-            System.out.println(lePegue.get(1));
+            if(origen.getGame().getGamePlayers().size()==2)
+            {
+           gPRival.getShips().forEach(cadaBarco->{
+               String queBarco=cadaBarco.getShipType();
+               List  hitsEnEste=new ArrayList();
+               cadaBarco.getShipLoc().forEach(cadaLoc->{
+                   Map <String,Object> hundidoCheck=new HashMap<>();
+                   for(int i=0; i< lePegue.size() ; i++){
+                   if(lePegue.get(i).containsValue(cadaLoc)){
+                       hitsEnEste.add("Ay");
+                   }}
+               });
+               if(hitsEnEste.size()>=cadaBarco.getShipLoc().size()){
+                   rivalesHundidos.put(queBarco, cadaBarco.getShipLoc());
+               }
+               miGameView.put("rivalesHundidos",rivalesHundidos);
+           });}
+      //////////para mis barcos
+            origen.getShips().forEach(cadaBarco->barcosMios.addAll(cadaBarco.getShipLoc()));
+            //System.out.println(origen.getSalvoes().size());
 
+            if(origen.getGame().getGamePlayers().size()==2) {
+
+                gPRival.getSalvoes().forEach(cadaSalvo -> {
+                    long salvoID = cadaSalvo.getSalvoID();
+                    if (cadaSalvo.getGamePlayer().getId() == gPRival.getId()) {
+                        //System.out.println("me dispara " + cadaSalvo.getGamePlayer());
+                        cadaSalvo.getSalvoLoc().forEach(cadaTiro -> {
+                            if (barcosMios.contains(cadaTiro)) {
+                                Map<String, Object> map = new HashMap<>();
+                                map.put("acertado", cadaTiro);
+                                map.put("salvo", salvoID);
+                                mePego.add(map);
+
+                            }
+                        });
+                    }
+                });
+
+            }
+            origen.getShips().forEach(cadaBarco->{
+                String queBarco=cadaBarco.getShipType();
+                List  hitsEnEste=new ArrayList();
+                cadaBarco.getShipLoc().forEach(cadaLoc->{
+                    Map <String,Object> hundidoCheck=new HashMap<>();
+                    for(int i=0; i< mePego.size() ; i++){
+                        if(mePego.get(i).containsValue(cadaLoc)){
+                            hitsEnEste.add("Ay");
+                            //System.out.println(cadaBarco.getShipType()+" tamagno "+cadaBarco.getShipLoc().size() +" aya");
+                        }}
+                });
+                if(hitsEnEste.size()==cadaBarco.getShipLoc().size()){
+                    misHundidos.put(queBarco, cadaBarco.getShipLoc());
+                }
+                miGameView.put("misHundidos",misHundidos);
+            });
+
+
+
+      //////////
         miGameView.put("Salvoes",origen.getGame().getGamePlayers().stream().flatMap(cada->cada.getSalvoes().stream().map(cadasalvo->cadasalvo.salvoDTO())));
         miGameView.put("misAciertos",lePegue);
-        return miGameView;}else{
+        String estado = null;
+            System.out.println("a ver");
+////controles estado. primero controlo que haya 2 gp
+
+            if(origen.getGame().getGamePlayers().size()<2)
+            {miGameView.put("Estado", "sinrival");
+            }
+            else    //hay 2 gp, sigo con los controles
+            {
+                System.out.println(origen.getShips().size() +" <-mis barc, mis hun->"+ misHundidos.size()
+                );
+                System.out.println(gPRival.getSalvoes().size() +" <-sus disp, mis disp->"+ origen.getSalvoes().size());
+                System.out.println(rivalesHundidos.size() +" <-sus hun, sus bar->"+ gPRival.getShips().size());
+                ////perdi?
+
+                if (5 == misHundidos.size()
+                        && gPRival.getSalvoes().size() == origen.getSalvoes().size()
+                        && rivalesHundidos.size() < 5
+                ) {
+                    estado = "perdi";
+                    System.out.println("perdi");
+                    miGameView.put("Estado", estado);
+                    if(origen.getScore()==null) {
+                        System.out.println("escribo resultado");
+                        scoreRepo.save(new Score(origen.getGame(), origen.getPlayer(), (float) 0.0, LocalDateTime.now()));
+                        scoreRepo.save(new Score(gPRival.getGame(), gPRival.getPlayer(), (float) 1.0, LocalDateTime.now()));
+                    }
+                }
+
+
+                ////gane?
+
+                if (5 > misHundidos.size()
+                        && gPRival.getSalvoes().size() == origen.getSalvoes().size()
+                        && rivalesHundidos.size() == 5
+                ) {
+                    estado = "gane";
+                    System.out.println("gane");
+                    miGameView.put("Estado", estado);
+                    if(origen.getScore()==null) {
+                        System.out.println("escribo resultado");
+                        scoreRepo.save(new Score(origen.getGame(), origen.getPlayer(), (float) 1.0, LocalDateTime.now()));
+                        scoreRepo.save(new Score(gPRival.getGame(), gPRival.getPlayer(), (float) 0.0, LocalDateTime.now()));
+                    }
+                }
+
+                ////empate?
+
+                if (5 == misHundidos.size()
+                        && gPRival.getSalvoes().size() == origen.getSalvoes().size()
+                        && rivalesHundidos.size() == 5
+                ) {
+                    estado = "empate";
+                    System.out.println("empate");
+                    miGameView.put("Estado", estado);
+                 if(origen.getScore()==null){
+                     System.out.println("escribo resultado");
+                    scoreRepo.save(new Score(origen.getGame(),origen.getPlayer(), (float) 0.5, LocalDateTime.now()));
+                    scoreRepo.save(new Score(gPRival.getGame(),gPRival.getPlayer(), (float) 0.5, LocalDateTime.now()));}
+                }
+
+/// quien dispara?
+                if (gPRival.getSalvoes().size() < origen.getSalvoes().size() 
+                        && estado !="perdi"
+                        &&estado!="gane"&&estado!="empate") {
+                    miGameView.put("Estado", "dispararival");
+                } else if (gPRival.getSalvoes().size() >= origen.getSalvoes().size()
+                        && estado !="perdi"
+                        &&estado!="gane"&&estado!="empate") {
+                    miGameView.put("Estado", "disparoyo");
+                }
+
+            }
+
+/// estan  barcos rivales
+
+            if (gPRival!=null &&gPRival.getShips().size()==0){
+                miGameView.put("Estado", "nohaybarcorival");
+            }
+
+            ////
+        return miGameView;}
+        else{
             return new ResponseEntity<>("A dónde te creés que vas?", HttpStatus.UNAUTHORIZED);
                     //"a donde vas?";
             }

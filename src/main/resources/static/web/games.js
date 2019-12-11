@@ -2,24 +2,41 @@
 var logueado = ""
 let reingreso = null
 window.onload = function () {
-    document.querySelector("input").value = sessionStorage.getItem("quien")
-    document.getElementById("nuevo").classList.remove("shown")
-    document.getElementById("nuevo").classList.add("hidden")
-    console.log(document.getElementById("nuevo").classList)
-    if (sessionStorage.getItem("quien")) {
-        console.log("ya hay alguien!!!!!")
-        document.getElementById("loginForm").classList.remove("shown")
-        document.getElementById("loginForm").classList.add("hidden")
-        document.getElementById("logoutForm").classList.remove("hidden")
-        document.getElementById("logoutForm").classList.add("shown")
+    fetch(`/api/logueado`, { method: "POST" }).then(r => { return r.text() }).
+        then(text => {
+            logueado = text
 
+            if (logueado != "guest") {
+                document.getElementById("loginForm").classList.remove("shown")
+                document.getElementById("loginForm").classList.add("hidden")
+                document.getElementById("logoutForm").classList.remove("hidden")
+                document.getElementById("logoutForm").classList.add("shown")
+
+                document.getElementById("nuevo").classList.remove("hidden")
+                document.getElementById("nuevo").classList.add("shown")
+                document.querySelector("div > p").innerHTML = sessionStorage.getItem("quien")
+            }
+        })
+
+
+    /*         document.querySelector("input").value = sessionStorage.getItem("quien")
+        document.getElementById("nuevo").classList.remove("shown")
+        document.getElementById("nuevo").classList.add("hidden")
         console.log(document.getElementById("nuevo").classList)
-        document.getElementById("nuevo").classList.remove("hidden")
-        document.getElementById("nuevo").classList.add("shown")
-        console.log(document.getElementById("nuevo").classList)
-        document.querySelector("div > p").innerHTML = sessionStorage.getItem("quien")
-    }
-};
+        if (sessionStorage.getItem("quien")) {
+            console.log("ya hay alguien!!!!!")
+            document.getElementById("loginForm").classList.remove("shown")
+            document.getElementById("loginForm").classList.add("hidden")
+            document.getElementById("logoutForm").classList.remove("hidden")
+            document.getElementById("logoutForm").classList.add("shown")
+
+            console.log(document.getElementById("nuevo").classList)
+            document.getElementById("nuevo").classList.remove("hidden")
+            document.getElementById("nuevo").classList.add("shown")
+            console.log(document.getElementById("nuevo").classList)
+            document.querySelector("div > p").innerHTML = sessionStorage.getItem("quien") */
+}
+    ;
 
 
 
@@ -105,14 +122,20 @@ function leaderboard(url, options) {
         })
 }
 function crearJuego() {
-    fetch(`/api/newGame`, { method: "POST" }).then(r => {
-        //(console.log("nuevo juego"))
-        return r.json()
-    })
-        .then(json => {
-            console.log(json)
-            window.location.assign(`game_view.html?gp=${json.data}`)
+
+    if (logueado != "guest") {
+        fetch(`/api/newGame`, { method: "POST" }).then(r => {
+            //(console.log("nuevo juego"))
+            return r.json()
         })
+            .then(json => {
+                console.log(json)
+                window.location.assign(`game_view.html?gp=${json.data}`)
+            })
+    } else {
+        display("You need to be logged in to create a game")
+    }
+
 }
 
 function dibujarTabla(t) {
@@ -171,9 +194,9 @@ function armarTabla(json) {
             x = json;
             for (let i = 0; i < x.length; i++) {
                 match = x[i].gameId
-                local = x[i].gamePlayer[0].player.fullName
+                local = ` ${x[i].gamePlayer[0].player.fullName} ${x[i].gamePlayer[0].gPid}`
                 if (x[i].gamePlayer[0].player.email == logueado && x[i].gamePlayer[1]) {
-                    console.log("game: ", match)
+                    //console.log("game: ", match)
                     reingreso = x[i].gamePlayer[0].gPid
                     btnReingreso = `<button onclick="reingresar(${x[i].gamePlayer[0].gPid})"> ${x[i].gamePlayer[0].player.fullName}, volver a este juego</button>`
 
@@ -191,12 +214,12 @@ function armarTabla(json) {
                 }
                 if (x[i].gamePlayer[1]) {
 
-                    visitante = x[i].gamePlayer[1].player.fullName
+                    visitante = `${x[i].gamePlayer[1].player.fullName} ${x[i].gamePlayer[1].gPid}`
                     mails.push(x[i].gamePlayer[1].player.email)
                     nombres.push(x[i].gamePlayer[1].player.fullName)
 
                 }
-                else if (x[i].gamePlayer[0].player.email != logueado) {
+                else if (x[i].gamePlayer[0].player.email != logueado && logueado != "guest") {
                     visitante = `<button onclick="sumarse(this.value)" value=${match}>Jugar con ${x[i].gamePlayer[0].player.fullName} !</button>`
                 } else { visitante = `<p>Sin rival aún</p>` }
                 nombres.push(x[i].gamePlayer[0].player.fullName)
@@ -240,10 +263,9 @@ function sumarse(d) {
 function signUp() {
     let email = document.getElementById("email").value
     let password = document.getElementById("password").value
-    console.log(email, " ", password)
     fetch(`/api/players?name=${email}&pwd=${password}`, { method: "POST" }).then(r => {
         if (!r.ok) {
-
+            console.log(r)
             return Promise.reject(r.json())
         }
         return r.json()
@@ -251,10 +273,15 @@ function signUp() {
         .then(json => {
             //console.log(json.email)
             display(json.email)
-        }).catch(error => error)
+        }).catch(error => {
+            console.log(error)
+            return error
+        })
         .then(jsonerror => {
-            console.log(jsonerror.error)
-            display(jsonerror.error)
+            if (jsonerror) {
+                console.log(jsonerror.error)
+                display(jsonerror.error)
+            }
         })
 
 

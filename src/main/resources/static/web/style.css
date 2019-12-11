@@ -138,6 +138,20 @@ td{
     margin:auto;
     width:60%
 }
+#tablaEstado{
+   border-collapse: collapse;
+   width: 100%
+
+}
+
+  #tablaEstado, #tablaEstado th, #tablaEstado td {
+    border: 1px solid rgb(235, 57, 57);
+  }
+  .hundido{
+background-color: black
+  }
+
+
 .apuntado{
     border:0.5em solid red;
     background-color: blueviolet
