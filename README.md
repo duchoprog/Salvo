@@ -1,2 +1,1 @@
-# Salvo
-fullstack project, Java back-end
+This is a Salvo Game I made for a Full Stack bootcamp. As you will see, there's no design going on, only took care of the Java Back End and the Javascript Front End functionality. You can try it here: salvobyducho.herokuapp.com . (Be patient, Heroku is not the fastest server in the neighbourhood)
